@@ -246,12 +246,62 @@ rule deduplicate_BAM:
         samtools sort -@ {threads} -o {output[2]} - 2> {log}
         """
 
+# Create Positive Strand
+rule positive_strand_BAM:
+    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
+    output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam")
+    threads: 4
+    conda: "./envs/deeptools.yaml"
+    message: "Create Positive Strand BAM"
+    shell:
+        """
+        bamCoverage -b {input} -o {output} --samFlagExclude 16
+        """
+
+
+# Create negative Strand
+rule negative_strand_BAM:
+    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
+    output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")
+    threads: 4
+    conda: "./envs/deeptools.yaml"
+    message: "Create Negative Strand BAM"
+    shell:
+        """
+        bamCoverage -b {input} -o {output} --samFlagExclude 16
+        """
+
+# Create index 
 rule index_final_BAM:
     input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
     output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam.bai")
     threads: 4
     conda: "./envs/samtools.yaml"
     message: "index final BAM {input}: {threads} threads"
+    shell:
+        """
+        samtools index -@ {threads} {input}
+        """
+
+# Create index Positive Strand
+rule index_final_positive_strand_BAM:
+    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam")
+    output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam.bai")
+    threads: 4
+    conda: "./envs/samtools.yaml"
+    message: "index positive strand final BAM {input}: {threads} threads"
+    shell:
+        """
+        samtools index -@ {threads} {input}
+        """
+
+# Create index Negative Strand
+rule index_final_negative_strand_BAM:
+    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")
+    output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam.bai")
+    threads: 4
+    conda: "./envs/samtools.yaml"
+    message: "index negative strand final BAM {input}: {threads} threads"
     shell:
         """
         samtools index -@ {threads} {input}
@@ -298,23 +348,6 @@ rule convert_to_bed:
         bedtools bamtobed -i {input} | gzip -nc > {output} 2> {log}
         """
 
-# Call Peaks with MACS2
-rule macs2_call_peaks:
-    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
-
-    output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_peaks.narrowPeak")
-
-    log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}.macs2")
-    params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
-            NAME = "{sample}_ext147"
-    threads: 4
-    conda: "./envs/macs2.yaml"
-    message: "call peaks {input}: {threads} threads"
-    shell:
-        """
-        macs2 callpeak -t {input} --name {params.NAME} -g hs --outdir {params.PEAK_DIR} --nomodel --extsize 147
-        """
-
 rule calculate_frip:
     input: 
            os.path.join(OUT_DIR, "{sample}/tags/{sample}.bed.gz"),
@@ -350,26 +383,6 @@ rule homer_analysis:
         # Run Homer for enrichemtn for de novo scanning
         #findMotifsGenome.pl {input.PEAK_FILE} hg38 {params.output_directory} -mcheck {input.MOTIF_FILE} -p 4
         """
-        
-# Call Peaks with MACS2
-rule macs2_call_peaks_for_IDR:
-    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
-
-    output: temp(os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks.narrowPeak")),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_sorted.bed")
-
-    log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}.macs2_IDR")
-    params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
-            NAME = "{sample}_ext147_p001"
-    threads: 4
-    conda: "./envs/macs2.yaml"
-    message: "call peaks {input}: {threads} threads"
-    shell:
-        """
-        macs2 callpeak -t {input} --name {params.NAME} -g hs --outdir {params.PEAK_DIR} --nomodel --extsize 147 -B -p 1e-3
-
-        sort -k8,8nr {output[0]} > {output[1]} 
-        """
 
 rule convert_bam_to_bigwig:
     input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam"),
@@ -382,5 +395,33 @@ rule convert_bam_to_bigwig:
     message: "convert {input} to bigwig: {threads} threads"
     shell:
         """
-        bamCoverage --bam {input[0]} -o {output} --binSize 1 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
+        bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
+        """
+
+rule convert_bam_to_bigwig:
+    input:  os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam"),
+            os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam.bai")
+    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_negStrand.bw")
+    log: os.path.join(OUT_DIR, "{sample}/logs/bigwig/{sample}_negStrand.bigwig")
+    threads: 4
+    params: BLACKLIST
+    conda: "./envs/deeptools.yaml"
+    message: "convert {input} to bigwig: {threads} threads"
+    shell:
+        """
+        bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
+        """
+
+rule convert_bam_to_bigwig:
+    input:  os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam"),
+            os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam.bai")
+    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_posStrand.bw")
+    log: os.path.join(OUT_DIR, "{sample}/logs/bigwig/{sample}_posStrand.bigwig")
+    threads: 4
+    params: BLACKLIST
+    conda: "./envs/deeptools.yaml"
+    message: "convert {input} to bigwig: {threads} threads"
+    shell:
+        """
+        bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
         """
