@@ -4,3 +4,7 @@ A snakemake workflow for ChIP-seq processing
 
 PDF version :
 [snakeChIP.pdf](https://github.com/user-attachments/files/16285150/snakeChIP.pdf)
+
+
+<object data="snakeChIP.pdf" type="application/pdf" width="100%"> 
+</object>
