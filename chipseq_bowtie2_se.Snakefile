@@ -247,7 +247,7 @@ rule deduplicate_BAM:
         """
 
 # Create Positive and Negative Strand
-rule positive_strand_BAM:
+rule create_strand_BAM:
     input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
     output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam"),
             os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")

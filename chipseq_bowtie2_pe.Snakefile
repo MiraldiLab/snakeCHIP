@@ -256,12 +256,51 @@ rule deduplicate_BAM:
         samtools sort -@ {threads} -o {output[2]} - 2> {log}
         """
 
+# Create Positive and Negative Strand
+rule create_strand_BAM:
+    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
+    output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam"),
+            os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")
+    threads: 4
+    conda: "./envs/deeptools.yaml"
+    message: "Create Positive and Negative Strand BAM"
+    shell:
+        """
+        bamCoverage -b {input} -o {output[0]} --samFlagExclude 16
+        
+        bamCoverage -b {input} -o {output[1]} --samFlagInclude 16
+        """
+
 rule index_final_BAM:
     input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
     output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam.bai")
     threads: 4
     conda: "./envs/samtools.yaml"
     message: "index final BAM {input}: {threads} threads"
+    shell:
+        """
+        samtools index -@ {threads} {input}
+        """
+
+# Create index Positive Strand
+rule index_final_positive_strand_BAM:
+    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam")
+    output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam.bai")
+    threads: 4
+    conda: "./envs/samtools.yaml"
+    message: "index positive strand final BAM {input}: {threads} threads"
+    shell:
+        """
+        samtools index -@ {threads} {input}
+        """
+
+# Create index Negative Strand
+rule index_final_negative_strand_BAM:
+    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")
+    output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam.bai")
+    threads: 4
+    conda: "./envs/samtools.yaml"
+    message: "index negative strand final BAM {input}: {threads} threads"
     shell:
         """
         samtools index -@ {threads} {input}
@@ -282,17 +321,27 @@ rule flagstat_deduplication_bam:
 
 # Get the flagstats for the final bam
 rule flagstat_final_bam:
-    input:  os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
+    input:  os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam"),
+            os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam"),
+            os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")
 
-    output: os.path.join(OUT_DIR, "{sample}/qc/flagstats/{sample}.bam.final.flagstat")
+    output: os.path.join(OUT_DIR, "{sample}/qc/flagstats/{sample}.bam.final.flagstat"),
+            os.path.join(OUT_DIR, "{sample}/qc/flagstats/{sample}.posStrand.bam.final.flagstat"),
+            os.path.join(OUT_DIR, "{sample}/qc/flagstats/{sample}.negStrand.bam.final.flagstat")
 
-    log:    os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_bam")
+    log:    os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_bam"),
+            os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_posStrand_bam"),
+            os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_negStrand_bam")
     threads: 2
     conda: "./envs/samtools.yaml"
     message: "flagstat_final_bam {input}: {threads} threads"
     shell:
         """
-        samtools flagstat {input} > {output} 2> {log}
+        samtools flagstat {input[0]} > {output[0]} 2> {log[0]}
+
+        samtools flagstat {input[1]} > {output[1]} 2> {log[1]}
+
+        samtools flagstat {input[2]} > {output[2]} 2> {log[2]}
         """
 
 # Convert alignments to bed file and bedpe file
@@ -393,4 +442,46 @@ rule convert_bam_to_bigwig:
     shell:
         """
         bamCoverage --bam {input[0]} -o {output} --binSize 1 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
+        """
+
+rule convert_bam_to_bigwig_quantRaw:
+    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam"),
+           os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam.bai")
+    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantRaw.bw")
+    log: os.path.join(OUT_DIR, "{sample}/logs/bigwig/{sample}.bigwig")
+    threads: 4
+    params: BLACKLIST
+    conda: "./envs/deeptools.yaml"
+    message: "convert {input} to bigwig: {threads} threads"
+    shell:
+        """
+        bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
+        """
+
+rule convert_bam_to_bigwig_posStrand_quantRaw:
+    input:  os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam"),
+            os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam.bai")
+    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_posStrand_quantRaw.bw")
+    log: os.path.join(OUT_DIR, "{sample}/logs/bigwig/{sample}_posStrand.bigwig")
+    threads: 4
+    params: BLACKLIST
+    conda: "./envs/deeptools.yaml"
+    message: "convert {input} to bigwig: {threads} threads"
+    shell:
+        """
+        bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
+        """
+        
+rule convert_bam_to_bigwig_negStrand_quantRaw:
+    input:  os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam"),
+            os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam.bai")
+    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_negStrand_quantRaw.bw")
+    log: os.path.join(OUT_DIR, "{sample}/logs/bigwig/{sample}_negStrand.bigwig")
+    threads: 4
+    params: BLACKLIST
+    conda: "./envs/deeptools.yaml"
+    message: "convert {input} to bigwig: {threads} threads"
+    shell:
+        """
+        bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
         """
