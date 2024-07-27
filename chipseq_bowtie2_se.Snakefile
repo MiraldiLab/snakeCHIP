@@ -69,9 +69,11 @@ NAMESORT_BAM_FILE = expand(OUT_DIR + "/{sample}/aligned_reads/{sample}.namesorte
 ## Build names for deduplication and the final BAM files
 ALL_DEDUPLICATED = expand(OUT_DIR + "/{sample}/aligned_reads/{sample}.deduplicated.bam", sample = meta.sample_list)
 FINAL_BAM_FILE = expand(OUT_DIR + "/{sample}/aligned_reads/{sample}.bam", sample = meta.sample_list)
+FINAL_POS_BAM_FILE = expand(os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam"), sample = meta.sample_list)
+FINAL_NEG_BAM_FILE = expand(os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam"), sample = meta.sample_list)
 
 # Optional Outputs
-FILE_TYPES = ["postfiltered", "prefiltered", "final", "deduplicated"]
+FILE_TYPES = ["postfiltered", "prefiltered", "final", "deduplicated","posStrandFinal", "negStrandFinal"]
 ALL_FLAGSTAT = expand(OUT_DIR + "/{sample}/qc/flagstats/{sample}.bam.{types}.flagstat", sample = meta.sample_list, types = FILE_TYPES)
 ALL_PEAKS = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_peaks.narrowPeak", sample = meta.sample_list)
 ALL_PEAKS_MACS_IDR = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_p001_peaks_sorted.bed", sample = meta.sample_list)
@@ -82,9 +84,12 @@ FASTQC_posttrim=expand(os.path.join(OUT_DIR, "{sample}/qc/fastqc/post_trim/{samp
 ALL_HOMER = expand(os.path.join(OUT_DIR, "{sample}/homer/homerResults.html"), sample = meta.sample_list)
 ALL_HOMER_SUMMARY = expand(os.path.join(OUT_DIR, "{sample}/homer/summary/{sample}_homer_summary.txt"), sample = meta.sample_list)
 FINAL_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}.bw"), sample = meta.sample_list)
+FINAL_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantRaw.bw"), sample = meta.sample_list)
+FINAL_POS_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_posStrand_quantRaw.bw"), sample = meta.sample_list)
+FINAL_NEG_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_negStrand_quantRaw.bw"), sample = meta.sample_list)
 
 rule all:
-    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE
+    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE
 
 rule get_fastq_se:
     priority: 2
@@ -318,12 +323,12 @@ rule flagstat_final_bam:
             os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")
 
     output: os.path.join(OUT_DIR, "{sample}/qc/flagstats/{sample}.bam.final.flagstat"),
-            os.path.join(OUT_DIR, "{sample}/qc/flagstats/{sample}.posStrand.bam.final.flagstat"),
-            os.path.join(OUT_DIR, "{sample}/qc/flagstats/{sample}.negStrand.bam.final.flagstat")
+            os.path.join(OUT_DIR, "{sample}/qc/flagstats/{sample}.bam.posStrandFinal.flagstat"),
+            os.path.join(OUT_DIR, "{sample}/qc/flagstats/{sample}.bam.negStrandFinal.flagstat")
 
     log:    os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_bam"),
-            os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_posStrand_bam"),
-            os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_negStrand_bam")
+            os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_posStrandFinal_bam"),
+            os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_posStrandFinal_bam")
     threads: 2
     conda: "./envs/samtools.yaml"
     message: "flagstat_final_bam {input}: {threads} threads"
