@@ -328,7 +328,7 @@ rule flagstat_final_bam:
 
     log:    os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_bam"),
             os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_posStrandFinal_bam"),
-            os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_posStrandFinal_bam")
+            os.path.join(OUT_DIR, "{sample}/logs/flagstat/{sample}.final.flagstat_negStrandFinal_bam")
     threads: 2
     conda: "./envs/samtools.yaml"
     message: "flagstat_final_bam {input}: {threads} threads"
