@@ -267,13 +267,12 @@ rule create_strand_BAM:
     output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam"),
             os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")
     threads: 4
-    conda: "./envs/deeptools.yaml"
+    conda: "./envs/samtools.yaml"
     message: "Create Positive and Negative Strand BAM"
     shell:
         """
-        bamCoverage -b {input} -o {output[0]} --samFlagExclude 16
-        
-        bamCoverage -b {input} -o {output[1]} --samFlagInclude 16
+        samtools -F 16 {input} -o {output[0]}
+        samtools -f 16 {input} -o {output[1]}
         """
 
 rule index_final_BAM:
