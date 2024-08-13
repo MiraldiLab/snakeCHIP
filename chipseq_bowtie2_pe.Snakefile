@@ -271,8 +271,8 @@ rule create_strand_BAM:
     message: "Create Positive and Negative Strand BAM"
     shell:
         """
-        samtools -F 16 {input} -o {output[0]}
-        samtools -f 16 {input} -o {output[1]}
+        samtools view -F 16 {input} -o {output[0]}
+        samtools view -f 16 {input} -o {output[1]}
         """
 
 rule index_final_BAM:
