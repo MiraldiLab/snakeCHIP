@@ -84,9 +84,9 @@ FASTQC_posttrim=expand(os.path.join(OUT_DIR, "{sample}/qc/fastqc/post_trim/{samp
 ALL_HOMER = expand(os.path.join(OUT_DIR, "{sample}/homer/homerResults.html"), sample = meta.sample_list)
 ALL_HOMER_SUMMARY = expand(os.path.join(OUT_DIR, "{sample}/homer/summary/{sample}_homer_summary.txt"), sample = meta.sample_list)
 FINAL_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}.bw"), sample = meta.sample_list)
-FINAL_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantRaw.bw"), sample = meta.sample_list)
-FINAL_POS_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_posStrand_quantRaw.bw"), sample = meta.sample_list)
-FINAL_NEG_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_negStrand_quantRaw.bw"), sample = meta.sample_list)
+FINAL_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantCPM.bw"), sample = meta.sample_list)
+FINAL_POS_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_posStrand_quantCPM.bw"), sample = meta.sample_list)
+FINAL_NEG_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_negStrand_quantCPM.bw"), sample = meta.sample_list)
 
 rule all:
     input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE
@@ -440,10 +440,10 @@ rule convert_bam_to_bigwig:
         bamCoverage --bam {input[0]} -o {output} --binSize 1 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
         """
 
-rule convert_bam_to_bigwig_quantRaw:
+rule convert_bam_to_bigwig_quantCPM:
     input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam"),
            os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam.bai")
-    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantRaw.bw")
+    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantCPM.bw")
     log: os.path.join(OUT_DIR, "{sample}/logs/bigwig/{sample}.bigwig")
     threads: 4
     params: BLACKLIST
@@ -454,10 +454,10 @@ rule convert_bam_to_bigwig_quantRaw:
         bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
         """
 
-rule convert_bam_to_bigwig_posStrand_quantRaw:
+rule convert_bam_to_bigwig_posStrand_quantCPM:
     input:  os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam"),
             os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam.bai")
-    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_posStrand_quantRaw.bw")
+    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_posStrand_quantCPM.bw")
     log: os.path.join(OUT_DIR, "{sample}/logs/bigwig/{sample}_posStrand.bigwig")
     threads: 4
     params: BLACKLIST
@@ -468,10 +468,10 @@ rule convert_bam_to_bigwig_posStrand_quantRaw:
         bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
         """
         
-rule convert_bam_to_bigwig_negStrand_quantRaw:
+rule convert_bam_to_bigwig_negStrand_quantCPM:
     input:  os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam"),
             os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam.bai")
-    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_negStrand_quantRaw.bw")
+    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_negStrand_quantCPM.bw")
     log: os.path.join(OUT_DIR, "{sample}/logs/bigwig/{sample}_negStrand.bigwig")
     threads: 4
     params: BLACKLIST
