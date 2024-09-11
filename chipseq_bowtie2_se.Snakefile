@@ -488,13 +488,13 @@ rule make_bw_hist_file:
     input:  os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantCPM.bw")
     output: os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32.tsv"),
             os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32_snsFormat.tsv")
-    log:
+    log:    os.path.join(OUT_DIR, "{sample}/logs/hist/{sample}.makeTSV")
     threads: 4
-    conda:
+    conda: "./envs/bwTOsnstsv.yaml"
     message: "Creating SNS format DF for histogram"
     shell:
         """
-        python ./scripts/bwTOsnstsv.py --input_bw {input[0]} --out_name {output[0]} {output[1]}
+        python ./scripts/bwTOsnstsv.py --input_bw {input[0]} --out_name {output[0]}, {output[1]}
         """
      
 

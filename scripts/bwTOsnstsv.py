@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
 	#add the arguments
 	parser.add_argument('--input_bw', dest = 'input_bw', help="input bigwig file")
-	parser.add_argument('--out_name', dest = 'out_name', help="output name for files")
+	parser.add_argument('--out_files', dest = 'out_files', help="output name for files", nargs='+')
 
 	#this allows you to access the arguments via the object args
 	args = parser.parse_args()
@@ -19,7 +19,6 @@ if __name__ == "__main__":
 # Open BigWig File in non-overlapping 32 bp windows
 
 bw = pyBigWig.open(args.input_bw)
-
 start = 0
 stop = start + 32
 step = 32
@@ -45,11 +44,11 @@ arr = np.nan_to_num(arr)
 
 # Write Array as tsv
 
-with open(str(args.out_name) + '_arr_bp32_w32.tsv', 'w') as f_output:
+with open(str(args.out_files[0]) as f_output:
     tsv_output = csv.writer(f_output, delimiter='\t')
     tsv_output.writerows(arr)
 
-df = pd.read_csv(str(args.out_name) + '_arr_bp32_w32.tsv', sep = '\t', header = None)
+df = pd.read_csv(str(args.out_files[0]), sep = '\t', header = None)
 
 # Drop rows with 0s
 dfdf = df.loc[~(df==0).all(axis=1)]
@@ -73,6 +72,6 @@ DFDF = DF.loc[~(DF==0).all(axis=1)]
 DFDF['log_val'] = np.log(DFDF['val'] + 1)
 
 # Export SNS Format df for boxplot
-DFDF.to_csv(str(args.out_name) + "_arr_bp32_w32_snsFormat.tsv", index =None, sep = '\t')
+DFDF.to_csv(str(args.out_files[1]), index =None, sep = '\t')
 
 # Generate df intersected with bed file of GS binding sites
