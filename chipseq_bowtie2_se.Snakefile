@@ -1,4 +1,5 @@
 import os
+from random import sample
 import pandas as pd
 
 configfile: "./inputs/config.yaml"
@@ -482,3 +483,86 @@ rule convert_bam_to_bigwig_negStrand_quantCPM:
         bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
         """
 
+
+rule make_bw_hist_file:
+    input:  os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantCPM.bw")
+    output: os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32.tsv"),
+            os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32_snsFormat.tsv")
+    log:
+    threads: 4
+    conda:
+    message: "Creating SNS format DF for histogram"
+    shell:
+        """
+        python ./scripts/bwTOsnstsv.py --input_bw {input[0]} --out_name {output[0]} {output[1]}
+        """
+     
+
+rule macs2_bdgcmp:
+    input:  os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_control_lambda.bdg"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_treat_pileup.bdg")
+    output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.bdg"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bdg")
+    log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}.macs2_bdgcmp")
+    threads: 4
+    conda: "./envs/macs2.yaml"
+    message: "Create bedgraph with macs2 compare bedgraphs"
+    shell:
+        """
+        macs2 bdgcmp -t {input[0]} -c {input[1]} -o {output[0]} -m logFE -p 1
+        macs2 bdgcmp -t {input[0]} -c {input[1]} -o {output[1]} -m logLR -p 1
+        """
+
+
+rule slop_bedGraph:
+    input:  os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.bdg"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bdg")
+    output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.bedgraph"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.bedgraph")
+    log: os.path.join(OUT_DIR, "{sample}/logs/peaks/{sample}_signal.bedgraph")
+    threads: 4
+    params: chrm_sizes = "/fs/ess/PES0738/20220614_maxatac_v1_data/snakemake/chip/inputs/hg38.chrom.sizes"
+    conda: "./envs/bedtools.yaml"
+    message: "macs bedgraph compare clean up step"
+    shell:
+        """
+        slopBed -i {input[0]} -g {params.chrm_sizes} -b 0 | bedClip stdin {output[0]}
+        slopBed -i {input[1]} -g {params.chrm_sizes} -b 0 | bedClip stdin {output[1]}
+
+        rm -f {input[0]}
+        rm -f {input[1]}
+        """
+
+
+rule sort_bedgraph:
+    input:  os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.bedgraph"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.bedgraph")
+    output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.srt.bedgraph"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph")
+    threads: 4
+    message: "Sorting Bedgraphs"
+    shell:
+    """
+    sort -k1,1 -k2,2n {input[0]} > {output[0]}
+    sort -k1,1 -k2,2n {input[1]} > {output[1]}
+    """
+
+
+rule bedGraph_To_Bigwig:
+    input:  os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.srt.bedgraph"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph")
+    output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.bw"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bw")
+    log: os.path.join(OUT_DIR, "{sample}/logs/peaks/{sample}.bedGraphToBigWig")
+    threads: 4
+    message: "Generate bedGraphToBigWig"
+    params: chrm_sizes = "/fs/ess/PES0738/20220614_maxatac_v1_data/snakemake/chip/inputs/hg38.chrom.sizes"
+    conda: "./envs/bedGraphToBigWig.yaml"
+    shell:
+        """
+        bedGraphToBigWig {input[0]} {params.chrm_sizes} {output[0]}
+        bedGraphToBigWig {input[1]} {params.chrm_sizes} {output[1]}
+
+        rm -f {input[0]}
+        rm -f {input[1]}
+        """
