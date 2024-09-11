@@ -89,8 +89,8 @@ FINAL_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}
 FINAL_POS_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_posStrand_quantCPM.bw"), sample = meta.sample_list)
 FINAL_NEG_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_negStrand_quantCPM.bw"), sample = meta.sample_list)
 
-FINAL_linearFE_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.bw"), sample = meta.sample_list)
-FINAL_log10FE_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bw"), sample = meta.sample_list)
+FINAL_linearFE_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFE.bw"), sample = meta.sample_list)
+FINAL_log10FE_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE.bw"), sample = meta.sample_list)
 
 FINAL_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32.tsv"), sample = meta.sample_list )
 FINAL_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32_snsFormat.tsv"), sample = meta.sample_list)
