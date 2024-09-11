@@ -89,8 +89,15 @@ FINAL_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}
 FINAL_POS_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_posStrand_quantCPM.bw"), sample = meta.sample_list)
 FINAL_NEG_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_negStrand_quantCPM.bw"), sample = meta.sample_list)
 
+FINAL_linearFE_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFE.bw"), sample = meta.sample_list)
+FINAL_log10FE_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE.bw"), sample = meta.sample_list)
+
+FINAL_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32.tsv"), sample = meta.sample_list )
+FINAL_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32_snsFormat.tsv"), sample = meta.sample_list)
+
+
 rule all:
-    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE
+    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE + FINAL_linearFE_BW_FILE + FINAL_log10FE_BW_FILE + FINAL_TSV + FINAL_SNS_TSV
 
 rule get_fastq_pe_gz:
     priority: 1
@@ -459,7 +466,7 @@ rule convert_bam_to_bigwig_quantCPM:
     message: "convert {input} to bigwig: {threads} threads"
     shell:
         """
-        bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
+        bamCoverage --bam {input[0]} -o {output} --binSize 32 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
         """
 
 rule convert_bam_to_bigwig_posStrand_quantCPM:
@@ -473,7 +480,7 @@ rule convert_bam_to_bigwig_posStrand_quantCPM:
     message: "convert {input} to bigwig: {threads} threads"
     shell:
         """
-        bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
+        bamCoverage --bam {input[0]} -o {output} --binSize 32 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
         """
         
 rule convert_bam_to_bigwig_negStrand_quantCPM:
@@ -487,5 +494,130 @@ rule convert_bam_to_bigwig_negStrand_quantCPM:
     message: "convert {input} to bigwig: {threads} threads"
     shell:
         """
-        bamCoverage --bam {input[0]} -o {output} --binSize 1 -p {threads} --exactScaling -bl {params}
+        bamCoverage --bam {input[0]} -o {output} --binSize 32 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
+        """
+
+rule make_bw_hist_file:
+    input:  os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantCPM.bw")
+    output: os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32.tsv"),
+            os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32_snsFormat.tsv")
+    log:    os.path.join(OUT_DIR, "{sample}/logs/hist/{sample}.makeTSV")
+    threads: 4
+    conda: "./envs/bwTOsnstsv.yaml"
+    message: "Creating SNS format DF for histogram"
+    shell:
+        """
+        python ./scripts/bwTOsnstsv.py --input_bw {input[0]} --out_name {output[0]}, {output[1]}
+        """
+
+
+rule macs2_bdgcmp:
+    input:  os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_control_lambda.bdg"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_treat_pileup.bdg")
+    output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.bdg"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bdg")
+    log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}.macs2_bdgcmp")
+    threads: 4
+    conda: "./envs/macs2.yaml"
+    message: "Create bedgraph with macs2 compare bedgraphs"
+    shell:
+        """
+        macs2 bdgcmp -t {input[0]} -c {input[1]} -o {output[0]} -m logFE -p 1
+        macs2 bdgcmp -t {input[0]} -c {input[1]} -o {output[1]} -m logLR -p 1
+        """
+
+
+rule slop_bedGraph:
+    input:  os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.bdg"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bdg")
+    output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.bedgraph"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.bedgraph")
+    log: os.path.join(OUT_DIR, "{sample}/logs/peaks/{sample}_signal.bedgraph")
+    threads: 4
+    params: chrm_sizes = "/fs/ess/PES0738/20220614_maxatac_v1_data/snakemake/chip/inputs/hg38.chrom.sizes"
+    conda: "./envs/bedtools.yaml"
+    message: "macs bedgraph compare clean up step"
+    shell:
+        """
+        slopBed -i {input[0]} -g {params.chrm_sizes} -b 0 | bedClip stdin {output[0]}
+        slopBed -i {input[1]} -g {params.chrm_sizes} -b 0 | bedClip stdin {output[1]}
+
+        rm -f {input[0]}
+        rm -f {input[1]}
+        """
+
+
+rule sort_bedgraph:
+    input:  os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.bedgraph"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.bedgraph")
+    output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.srt.bedgraph"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph")
+    threads: 4
+    message: "Sorting Bedgraphs"
+    shell:
+        """
+        sort -k1,1 -k2,2n {input[0]} > {output[0]}
+        sort -k1,1 -k2,2n {input[1]} > {output[1]}
+        """
+rule bedtools_window:
+    input:
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.srt.bedgraph"),
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph")
+    output:
+        os.path.join(OUT_DIR, "{sample}/peaks/hg38_w32.bed"),
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.mapped.bedgraph"),
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.mapped.bedgraph"),
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.mapped.srt.bedgraph"),
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.mapped.srt.bedgraph")
+
+    log:
+        os.path.join(OUT_DIR, "{sample}/logs/peaks/{sample}_mapping.bedGraph")
+    threads: 8
+    message:
+        "window hg38 and map bedgraph"
+    params:
+        chrm_sizes = "/fs/ess/PES0738/20220614_maxatac_v1_data/snakemake/chip/inputs/hg38.chrom.sizes"
+    conda:
+        "./envs/bedtools.yaml"
+    shell:
+        """
+        bedtools makewindows -g {params.chrm_sizes} -w 32 > {output[0]}
+
+        bedtools map -a {output[0]} -b {input[0]} -c 4 -o mean > {output[1]}
+
+        bedtools map -a {output[0]} -b {input[0]} -c 4 -o mean > {output[2]}
+
+        sort -k1,1 -k2,2n {output[1]}  > {output[3]}
+        sort -k1,1 -k2,2n {output[2]}  > {output[4]}
+
+        rm -f {output[0]}
+        rm -f {output[1]}
+        rm -f {output[2]}
+        """
+
+
+rule bedGraph_To_Bigwig:
+    input:
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.mapped.srt.bedgraph"),
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.mapped.srt.bedgraph")
+    output:
+        os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFE.bw"),
+        os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE.bw")
+    log:
+        os.path.join(OUT_DIR, "{sample}/logs/bigwig/{sample}.bedGraphToBigWig")
+    threads:
+        4
+    message:
+        "Generate bedGraphToBigWig"
+    params:
+        chrm_sizes = "/fs/ess/PES0738/20220614_maxatac_v1_data/snakemake/chip/inputs/hg38.chrom.sizes"
+    conda:
+        "./envs/bedGraphToBigWig.yaml"
+    shell:
+        """
+        bedGraphToBigWig {input[0]} {params.chrm_sizes} {output[0]}
+        bedGraphToBigWig {input[1]} {params.chrm_sizes} {output[1]}
+
+        rm -f {input[0]}
+        rm -f {input[1]}
         """
