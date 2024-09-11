@@ -260,12 +260,17 @@ rule deduplicate_BAM:
 
 # Create Positive and Negative Strand
 rule create_strand_BAM:
-    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
-    output: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam"),
-            os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")
-    threads: 4
-    conda: "./envs/samtools.yaml"
-    message: "Create Positive and Negative Strand BAM"
+    input:
+        os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
+    output:
+        os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam"),
+        os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")
+    threads:
+        4
+    conda:
+        "./envs/samtools.yaml"
+    message:
+        "Create Positive and Negative Strand BAM"
     shell:
         """
         samtools view -F 16 {input} -o {output[0]}
@@ -555,15 +560,22 @@ rule sort_bedgraph:
 
 
 rule bedGraph_To_Bigwig:
-    input:  os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.srt.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph")
-    output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.bw"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bw")
-    log: os.path.join(OUT_DIR, "{sample}/logs/peaks/{sample}.bedGraphToBigWig")
-    threads: 4
-    message: "Generate bedGraphToBigWig"
-    params: chrm_sizes = "/fs/ess/PES0738/20220614_maxatac_v1_data/snakemake/chip/inputs/hg38.chrom.sizes"
-    conda: "./envs/bedGraphToBigWig.yaml"
+    input:
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.srt.bedgraph"),
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph")
+    output:
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.bw"),
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bw")
+    log:
+        os.path.join(OUT_DIR, "{sample}/logs/peaks/{sample}.bedGraphToBigWig")
+    threads: 
+        4
+    message:
+        "Generate bedGraphToBigWig"
+    params:
+        chrm_sizes = "/fs/ess/PES0738/20220614_maxatac_v1_data/snakemake/chip/inputs/hg38.chrom.sizes"
+    conda:
+        "./envs/bedGraphToBigWig.yaml"
     shell:
         """
         bedGraphToBigWig {input[0]} {params.chrm_sizes} {output[0]}
