@@ -553,10 +553,10 @@ rule sort_bedgraph:
     threads: 4
     message: "Sorting Bedgraphs"
     shell:
-    """
-    sort -k1,1 -k2,2n {input[0]} > {output[0]}
-    sort -k1,1 -k2,2n {input[1]} > {output[1]}
-    """
+        """
+        sort -k1,1 -k2,2n {input[0]} > {output[0]}
+        sort -k1,1 -k2,2n {input[1]} > {output[1]}
+        """
 
 
 rule bedGraph_To_Bigwig:
