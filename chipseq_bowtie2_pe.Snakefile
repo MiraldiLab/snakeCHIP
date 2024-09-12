@@ -466,7 +466,7 @@ rule convert_bam_to_bigwig_quantCPM:
     message: "convert {input} to bigwig: {threads} threads"
     shell:
         """
-        bamCoverage --bam {input[0]} -o {output} --binSize 32 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
+        bamCoverage --bam {input[0]} -o {output} --binSize 1 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
         """
 
 rule convert_bam_to_bigwig_posStrand_quantCPM:
@@ -480,7 +480,7 @@ rule convert_bam_to_bigwig_posStrand_quantCPM:
     message: "convert {input} to bigwig: {threads} threads"
     shell:
         """
-        bamCoverage --bam {input[0]} -o {output} --binSize 32 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
+        bamCoverage --bam {input[0]} -o {output} --binSize 1 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
         """
         
 rule convert_bam_to_bigwig_negStrand_quantCPM:
@@ -494,7 +494,7 @@ rule convert_bam_to_bigwig_negStrand_quantCPM:
     message: "convert {input} to bigwig: {threads} threads"
     shell:
         """
-        bamCoverage --bam {input[0]} -o {output} --binSize 32 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
+        bamCoverage --bam {input[0]} -o {output} --binSize 1 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
         """
 
 rule make_bw_hist_file:
