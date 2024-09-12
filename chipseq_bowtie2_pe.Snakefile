@@ -522,8 +522,8 @@ rule macs2_bdgcmp:
     message: "Create bedgraph with macs2 compare bedgraphs"
     shell:
         """
-        macs2 bdgcmp -c {input[0]} -t {input[1]} -o {output[0]} -m logFE -p 1
-        macs2 bdgcmp -c {input[0]} -t {input[1]} -o {output[1]} -m logLR -p 1
+        macs2 bdgcmp -t {input[1]} -c {input[0]} -o {output[0]} -m logFE -p 1
+        macs2 bdgcmp -t {input[1]} -c {input[0]} -o {output[1]} -m logLR -p 1
         """
 
 
