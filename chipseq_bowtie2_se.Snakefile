@@ -505,7 +505,7 @@ rule make_bw_hist_file:
     message: "Creating SNS format DF for histogram"
     shell:
         """
-        python ./scripts/bwTOsnstsv.py --input_bw {input[0]} --out_name {output[0]}, {output[1]}
+        python ./scripts/bwTOsnstsv.py --input_bw {input[0]} --out_name {output[0]} {output[1]}
         """
      
 
@@ -537,8 +537,8 @@ rule slop_bedGraph:
     message: "macs bedgraph compare clean up step"
     shell:
         """
-        slopBed -i {input[0]} -g {params.chrm_sizes} -b 0 | bedClip stdin {output[0]}
-        slopBed -i {input[1]} -g {params.chrm_sizes} -b 0 | bedClip stdin {output[1]}
+        slopBed -i {input[0]} -g {params.chrm_sizes} -b 0 | bedClip stdin {params.chrm_sizes} {output[0]}
+        slopBed -i {input[1]} -g {params.chrm_sizes} -b 0 | bedClip stdin {params.chrm_sizes} {output[1]}
 
         rm -f {input[0]}
         rm -f {input[1]}
