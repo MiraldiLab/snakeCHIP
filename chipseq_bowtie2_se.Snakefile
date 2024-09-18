@@ -533,7 +533,7 @@ rule slop_bedGraph:
     log: os.path.join(OUT_DIR, "{sample}/logs/peaks/{sample}_signal.bedgraph")
     threads: 4
     params: chrm_sizes = "/fs/ess/PES0738/20220614_maxatac_v1_data/snakemake/chip/inputs/hg38.chrom.sizes"
-    conda: "./envs/bedtools.yaml"
+    conda: "./envs/slopBed.yaml"
     message: "macs bedgraph compare clean up step"
     shell:
         """
