@@ -32,13 +32,13 @@ for i in range(50818048): #50818048
         arr.append(val)
     
     except:
-        print("error in last")
-        
+        #print("error in last")
+        pass
 
     start = start + step
     stop = stop + step
-    perc = (i/50818048) * 100
-    print("start: ", start, "stop: ", stop, "Completed: ",perc, "% done")
+    #perc = (i/50818048) * 100
+    #print("start: ", start, "stop: ", stop, "Completed: ",perc, "% done")
 
 arr = np.nan_to_num(arr)
 
@@ -69,10 +69,11 @@ for i in range(dfdf.shape[0]):
     all_data.append(baby_df)
 
 DF = pd.concat(all_data, axis=0)
+DFDF = DF
 #DFDF = DF.loc[~(DF==0).all(axis=1)]
 DFDF['log_val'] = np.log(DFDF['val'] + 1)
 
 # Export SNS Format df for boxplot
 DFDF.to_csv(str(args.out_name[1]), index =None, sep = '\t')
+print("SNS Format df printed")
 
-# Generate df intersected with bed file of GS binding sites
