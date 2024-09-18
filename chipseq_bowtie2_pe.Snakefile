@@ -559,47 +559,11 @@ rule sort_bedgraph:
         sort -k1,1 -k2,2n {input[0]} > {output[0]}
         sort -k1,1 -k2,2n {input[1]} > {output[1]}
         """
-rule bedtools_window:
-    input:
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.srt.bedgraph"),
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph")
-    output:
-        os.path.join(OUT_DIR, "{sample}/peaks/hg38_w32.bed"),
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.mapped.bedgraph"),
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.mapped.bedgraph"),
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.mapped.srt.bedgraph"),
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.mapped.srt.bedgraph")
-
-    log:
-        os.path.join(OUT_DIR, "{sample}/logs/peaks/{sample}_mapping.bedGraph")
-    threads: 8
-    message:
-        "window hg38 and map bedgraph"
-    params:
-        chrm_sizes = "/fs/ess/PES0738/20220614_maxatac_v1_data/snakemake/chip/inputs/hg38.chrom.sizes"
-    conda:
-        "./envs/bedtools.yaml"
-    shell:
-        """
-        bedtools makewindows -g {params.chrm_sizes} -w 32 > {output[0]}
-
-        bedtools map -a {output[0]} -b {input[0]} -c 4 -o mean > {output[1]}
-
-        bedtools map -a {output[0]} -b {input[0]} -c 4 -o mean > {output[2]}
-
-        sort -k1,1 -k2,2n {output[1]}  > {output[3]}
-        sort -k1,1 -k2,2n {output[2]}  > {output[4]}
-
-        rm -f {output[0]}
-        rm -f {output[1]}
-        rm -f {output[2]}
-        """
-
 
 rule bedGraph_To_Bigwig:
     input:
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.mapped.srt.bedgraph"),
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.mapped.srt.bedgraph")
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFE.fc.signal.srt.bedgraph"),
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph")
     output:
         os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFE.bw"),
         os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE.bw")
