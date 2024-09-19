@@ -593,7 +593,7 @@ rule bedGraph_To_Bigwig:
         rm -f {input[1]}
         """
 
- rule make_FE_bw_hist_file:
+rule make_FE_bw_hist_file:
     input:  os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFE.bw"),
             os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE.bw")
     output: os.path.join(OUT_DIR, "{sample}/hist/{sample}_linearFE_chr22_arr_bp32_w32.tsv"),
