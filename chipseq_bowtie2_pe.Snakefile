@@ -89,15 +89,22 @@ FINAL_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}
 FINAL_POS_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_posStrand_quantCPM.bw"), sample = meta.sample_list)
 FINAL_NEG_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_negStrand_quantCPM.bw"), sample = meta.sample_list)
 
+FINAL_QUANT_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantRAW.bw"), sample = meta.sample_list)
+
 FINAL_linearFE_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFE.bw"), sample = meta.sample_list)
 FINAL_log10FE_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE.bw"), sample = meta.sample_list)
 
 FINAL_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32.tsv"), sample = meta.sample_list )
 FINAL_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32_snsFormat.tsv"), sample = meta.sample_list)
 
+FINAL_LINEARFE_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_linearFE_chr22_arr_bp32_w32.tsv"), sample = meta.sample_list )
+FINAL_LINEARFE_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_linearFE_chr22_arr_bp32_w32_snsFormat.tsv"), sample = meta.sample_list )
+FINAL_LOG10FE_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_log10FE_chr22_arr_bp32_w32.tsv"), sample = meta.sample_list )
+FINAL_LOG10FE_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_log10FE_chr22_arr_bp32_w32_snsFormat.tsv"), sample = meta.sample_list )
+
 
 rule all:
-    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE + FINAL_linearFE_BW_FILE + FINAL_log10FE_BW_FILE + FINAL_TSV + FINAL_SNS_TSV
+    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE + FINAL_linearFE_BW_FILE + FINAL_log10FE_BW_FILE + FINAL_TSV + FINAL_SNS_TSV + FINAL_LINEARFE_TSV + FINAL_LINEARFE_SNS_TSV + FINAL_LOG10FE_TSV + FINAL_LOG10FE_SNS_TSV + FINAL_QUANT_FILE
 
 rule get_fastq_pe_gz:
     priority: 1
@@ -584,4 +591,22 @@ rule bedGraph_To_Bigwig:
 
         rm -f {input[0]}
         rm -f {input[1]}
+        """
+
+ rule make_FE_bw_hist_file:
+    input:  os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFE.bw"),
+            os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE.bw")
+    output: os.path.join(OUT_DIR, "{sample}/hist/{sample}_linearFE_chr22_arr_bp32_w32.tsv"),
+            os.path.join(OUT_DIR, "{sample}/hist/{sample}_linearFE_chr22_arr_bp32_w32_snsFormat.tsv"),
+            os.path.join(OUT_DIR, "{sample}/hist/{sample}_log10FE_chr22_arr_bp32_w32.tsv"),
+            os.path.join(OUT_DIR, "{sample}/hist/{sample}_log10FE_chr22_arr_bp32_w32_snsFormat.tsv")
+
+    log:    os.path.join(OUT_DIR, "{sample}/logs/hist/{sample}_linear_log.makeTSV")
+    threads: 4
+    conda: "./envs/bwTOsnstsv.yaml"
+    message: "Creating SNS format DF for histogram"
+    shell:
+        """
+        python ./scripts/bwTOsnstsv.py --input_bw {input[0]} --out_name {output[0]} {output[1]}
+        python ./scripts/bwTOsnstsv.py --input_bw {input[1]} --out_name {output[2]} {output[3]}
         """
