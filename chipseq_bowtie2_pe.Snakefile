@@ -465,7 +465,8 @@ rule convert_bam_to_bigwig:
 rule convert_bam_to_bigwig_quantCPM:
     input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam"),
            os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam.bai")
-    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantCPM.bw")
+    output: os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantCPM.bw"),
+            os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_quantRAW.bw")
     log: os.path.join(OUT_DIR, "{sample}/logs/bigwig/{sample}.bigwig")
     threads: 4
     params: BLACKLIST
@@ -474,6 +475,7 @@ rule convert_bam_to_bigwig_quantCPM:
     shell:
         """
         bamCoverage --bam {input[0]} -o {output} --binSize 1 --normalizeUsing CPM -p {threads} --exactScaling -bl {params}
+        bamCoverage --bam {input[0]} -o {output[1]} --binSize 1 -p {threads} --exactScaling -bl {params}
         """
 
 rule convert_bam_to_bigwig_posStrand_quantCPM:
