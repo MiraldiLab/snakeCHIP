@@ -443,6 +443,27 @@ rule macs2_call_peaks_for_IDR:
         sort -k8,8nr {output[0]} > {output[1]} 
         """
 
+# Call Peaks with MACS2
+rule macs2_call_peaks_for_IDR_posStrand:
+    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam")
+
+    output: temp(os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_posStrand.narrowPeak")),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_sorted_posStrand.bed")
+
+    log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}_posStrand.macs2_IDR")
+    params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
+            NAME = "{sample}_ext147_p001_posStrand"
+    threads: 4
+    conda: "./envs/macs2.yaml"
+    message: "call peaks {input}: {threads} threads"
+    shell:
+        """
+        macs2 callpeak -t {input} --name {params.NAME} -g hs --outdir {params.PEAK_DIR} --nomodel --extsize 147 -B -p 1e-3
+
+        sort -k8,8nr {output[0]} > {output[1]}
+        """
+
+
 rule convert_bam_to_bigwig:
     input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam"),
            os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam.bai")
@@ -525,8 +546,8 @@ rule macs2_bdgcmp:
     message: "Create bedgraph with macs2 compare bedgraphs"
     shell:
         """
-        macs2 bdgcmp -t {input[1]} -c {input[0]} -o {output[0]} -m logFE -p 1
-        macs2 bdgcmp -t {input[1]} -c {input[0]} -o {output[1]} -m logLR -p 1
+        macs2 bdgcmp -t {input[1]} -c {input[0]} -o {output[0]} -m FE -p 1
+        macs2 bdgcmp -t {input[1]} -c {input[0]} -o {output[1]} -m logFE -p 1
         """
 
 
