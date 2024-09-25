@@ -78,8 +78,8 @@ FILE_TYPES = ["postfiltered", "prefiltered", "final", "deduplicated","posStrandF
 ALL_FLAGSTAT = expand(OUT_DIR + "/{sample}/qc/flagstats/{sample}.bam.{types}.flagstat", sample = meta.sample_list, types = FILE_TYPES)
 ALL_PEAKS = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_peaks.narrowPeak", sample = meta.sample_list)
 ALL_PEAKS_MACS_IDR = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_p001_peaks_sorted.bed", sample = meta.sample_list)
-ALL_PEAKS_POSSTRAND_MACS_IDR = expand(OUT_DIR + "{sample}/peaks/{sample}_ext147_p001_posStrand_peaks_sorted.bed", sample = meta.sample_list)
-ALL_PEAKS_NEGSTRAND_MACS_IDR = expand(OUT_DIR + "{sample}/peaks/{sample}_ext147_p001_negStrand_peaks_sorted.bed", sample = meta.sample_list)
+ALL_PEAKS_POSSTRAND_MACS_IDR = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_p001_posStrand_peaks_sorted.bed", sample = meta.sample_list)
+ALL_PEAKS_NEGSTRAND_MACS_IDR = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_p001_negStrand_peaks_sorted.bed", sample = meta.sample_list)
 
 ALL_TAGALIGN = expand(OUT_DIR + "/{sample}/tags/{sample}.bed.gz", sample = meta.sample_list)
 FRIP = expand(os.path.join(OUT_DIR, "{sample}/qc/frip/{sample}_FRIP.txt"), sample = meta.sample_list)
