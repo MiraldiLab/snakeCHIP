@@ -78,8 +78,8 @@ FILE_TYPES = ["postfiltered", "prefiltered", "final", "deduplicated","posStrandF
 ALL_FLAGSTAT = expand(OUT_DIR + "/{sample}/qc/flagstats/{sample}.bam.{types}.flagstat", sample = meta.sample_list, types = FILE_TYPES)
 ALL_PEAKS = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_peaks.narrowPeak", sample = meta.sample_list)
 ALL_PEAKS_MACS_IDR = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_p001_peaks_sorted.bed", sample = meta.sample_list)
-ALL_PEAKS_POSSTRAND_MACS_IDR = expand(OUT_DIR + "{sample}/peaks/{sample}_ext147_p001_peaks_sorted_posStrand.bed", sample = meta.sample_list)
-ALL_PEAKS_NEGSTRAND_MACS_IDR = expand(OUT_DIR + "{sample}/peaks/{sample}_ext147_p001_peaks_sorted_negStrand.bed", sample = meta.sample_list)
+ALL_PEAKS_POSSTRAND_MACS_IDR = expand(OUT_DIR + "{sample}/peaks/{sample}_ext147_p001_posStrand_peaks_sorted.bed", sample = meta.sample_list)
+ALL_PEAKS_NEGSTRAND_MACS_IDR = expand(OUT_DIR + "{sample}/peaks/{sample}_ext147_p001_negStrand_peaks_sorted.bed", sample = meta.sample_list)
 
 ALL_TAGALIGN = expand(OUT_DIR + "/{sample}/tags/{sample}.bed.gz", sample = meta.sample_list)
 FRIP = expand(os.path.join(OUT_DIR, "{sample}/qc/frip/{sample}_FRIP.txt"), sample = meta.sample_list)
@@ -458,8 +458,12 @@ rule macs2_call_peaks_for_IDR:
 rule macs2_call_peaks_for_IDR_posStrand:
     input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_posStrand.bam")
 
-    output: temp(os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_posStrand.narrowPeak")),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_sorted_posStrand.bed")
+    output: temp(os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_posStrand_peaks.narrowPeak")),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_posStrand_peaks_sorted.bed"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_posStrand_control_lambda.bdg"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_posStrand_peaks.xls"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_posStrand_summits.bed"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_posStrand_treat_pileup.bdg")
 
     log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}_posStrand.macs2_IDR")
     params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
@@ -478,8 +482,12 @@ rule macs2_call_peaks_for_IDR_posStrand:
 rule macs2_call_peaks_for_IDR_negStrand:
     input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")
 
-    output: temp(os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_negStrand.narrowPeak")),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_sorted_negStrand.bed")
+    output: temp(os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_negStrand_peaks.narrowPeak")),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_negStrand_peaks_sorted.bed"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_negStrand_control_lambda.bdg"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_negStrand_peaks.xls"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_negStrand_summits.bed"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_negStrand_treat_pileup.bdg")
 
     log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}_negStrand.macs2_IDR")
     params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
