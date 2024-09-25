@@ -78,6 +78,8 @@ FILE_TYPES = ["postfiltered", "prefiltered", "final", "deduplicated","posStrandF
 ALL_FLAGSTAT = expand(OUT_DIR + "/{sample}/qc/flagstats/{sample}.bam.{types}.flagstat", sample = meta.sample_list, types = FILE_TYPES)
 ALL_PEAKS = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_peaks.narrowPeak", sample = meta.sample_list)
 ALL_PEAKS_MACS_IDR = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_p001_peaks_sorted.bed", sample = meta.sample_list)
+ALL_PEAKS_POSSTRAND_MACS_IDR = expand(OUT_DIR + "{sample}/peaks/{sample}_ext147_p001_peaks_sorted_posStrand.bed", sample = meta.sample_list)
+ALL_PEAKS_NEGSTRAND_MACS_IDR = expand(OUT_DIR + "{sample}/peaks/{sample}_ext147_p001_peaks_sorted_negStrand.bed", sample = meta.sample_list)
 
 ALL_TAGALIGN = expand(OUT_DIR + "/{sample}/tags/{sample}.bed.gz", sample = meta.sample_list)
 FRIP = expand(os.path.join(OUT_DIR, "{sample}/qc/frip/{sample}_FRIP.txt"), sample = meta.sample_list)
@@ -107,7 +109,7 @@ FINAL_LOG10FE_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_log
 
 
 rule all:
-    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE + FINAL_linearFC_BW_FILE + FINAL_log10FE_BW_FILE + FINAL_TSV + FINAL_SNS_TSV + FINAL_linearFC_TSV + FINAL_linearFC_SNS_TSV + FINAL_LOG10FE_TSV + FINAL_LOG10FE_SNS_TSV + FINAL_linearFC_posStrand_BW_FILE + FINAL_log10FE_posStrand_BW_FILE + FINAL_linearFC_negStrand_BW_FILE + FINAL_log10FE_negStrand_BW_FILE
+    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE + FINAL_linearFC_BW_FILE + FINAL_log10FE_BW_FILE + FINAL_TSV + FINAL_SNS_TSV + FINAL_linearFC_TSV + FINAL_linearFC_SNS_TSV + FINAL_LOG10FE_TSV + FINAL_LOG10FE_SNS_TSV + FINAL_linearFC_posStrand_BW_FILE + FINAL_log10FE_posStrand_BW_FILE + FINAL_linearFC_negStrand_BW_FILE + FINAL_log10FE_negStrand_BW_FILE = ALL_PEAKS_POSSTRAND_MACS_IDR + ALL_PEAKS_NEGSTRAND_MACS_IDR
 
 rule get_fastq_pe_gz:
     priority: 1
@@ -462,6 +464,26 @@ rule macs2_call_peaks_for_IDR_posStrand:
     log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}_posStrand.macs2_IDR")
     params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
             NAME = "{sample}_ext147_p001_posStrand"
+    threads: 4
+    conda: "./envs/macs2.yaml"
+    message: "call peaks {input}: {threads} threads"
+    shell:
+        """
+        macs2 callpeak -t {input} --name {params.NAME} -g hs --outdir {params.PEAK_DIR} --nomodel --extsize 147 -B -p 1e-3
+
+        sort -k8,8nr {output[0]} > {output[1]}
+        """
+
+# Call Peaks with MACS2
+rule macs2_call_peaks_for_IDR_negStrand:
+    input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}_negStrand.bam")
+
+    output: temp(os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_negStrand.narrowPeak")),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_sorted_negStrand.bed")
+
+    log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}_negStrand.macs2_IDR")
+    params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
+            NAME = "{sample}_ext147_p001_negStrand"
     threads: 4
     conda: "./envs/macs2.yaml"
     message: "call peaks {input}: {threads} threads"
