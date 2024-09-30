@@ -78,8 +78,6 @@ FILE_TYPES = ["postfiltered", "prefiltered", "final", "deduplicated","posStrandF
 ALL_FLAGSTAT = expand(OUT_DIR + "/{sample}/qc/flagstats/{sample}.bam.{types}.flagstat", sample = meta.sample_list, types = FILE_TYPES)
 ALL_PEAKS = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_peaks.narrowPeak", sample = meta.sample_list)
 ALL_PEAKS_MACS_IDR = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_p001_peaks_sorted.bed", sample = meta.sample_list)
-ALL_PEAKS_POSSTRAND_MACS_IDR = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_p001_posStrand_peaks_sorted.bed", sample = meta.sample_list)
-ALL_PEAKS_NEGSTRAND_MACS_IDR = expand(OUT_DIR + "/{sample}/peaks/{sample}_ext147_p001_negStrand_peaks_sorted.bed", sample = meta.sample_list)
 
 ALL_TAGALIGN = expand(OUT_DIR + "/{sample}/tags/{sample}.bed.gz", sample = meta.sample_list)
 FRIP = expand(os.path.join(OUT_DIR, "{sample}/qc/frip/{sample}_FRIP.txt"), sample = meta.sample_list)
@@ -94,21 +92,13 @@ FINAL_NEG_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigw
 FINAL_linearFC_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFC.bw"), sample = meta.sample_list)
 FINAL_log10FE_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE.bw"), sample = meta.sample_list)
 
-FINAL_linearFC_posStrand_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFC_posStrand.bw"), sample = meta.sample_list)
-FINAL_log10FE_posStrand_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE_posStrand.bw"), sample = meta.sample_list)
-FINAL_linearFC_negStrand_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFC_negStrand.bw"), sample = meta.sample_list)
-FINAL_log10FE_negStrand_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE_negStrand.bw"), sample = meta.sample_list)
-
-FINAL_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32.tsv"), sample = meta.sample_list )
 FINAL_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32_snsFormat.tsv"), sample = meta.sample_list)
 
-FINAL_linearFC_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_linearFC_chr22_arr_bp32_w32.tsv"), sample = meta.sample_list )
 FINAL_linearFC_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_linearFC_chr22_arr_bp32_w32_snsFormat.tsv"), sample = meta.sample_list )
-FINAL_LOG10FE_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_log10FE_chr22_arr_bp32_w32.tsv"), sample = meta.sample_list )
 FINAL_LOG10FE_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_log10FE_chr22_arr_bp32_w32_snsFormat.tsv"), sample = meta.sample_list )
 
 rule all:
-    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE + FINAL_linearFC_BW_FILE + FINAL_log10FE_BW_FILE + FINAL_TSV + FINAL_SNS_TSV + FINAL_linearFC_TSV + FINAL_linearFC_SNS_TSV + FINAL_LOG10FE_TSV + FINAL_LOG10FE_SNS_TSV + FINAL_linearFC_posStrand_BW_FILE + FINAL_log10FE_posStrand_BW_FILE + FINAL_linearFC_negStrand_BW_FILE + FINAL_log10FE_negStrand_BW_FILE + ALL_PEAKS_POSSTRAND_MACS_IDR + ALL_PEAKS_NEGSTRAND_MACS_IDR
+    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE + FINAL_linearFC_BW_FILE + FINAL_log10FE_BW_FILE + FINAL_SNS_TSV  + FINAL_linearFC_SNS_TSV + FINAL_LOG10FE_SNS_TSV
 
 rule get_fastq_se:
     priority: 2
@@ -576,17 +566,9 @@ rule make_bw_hist_file:
 
 rule macs2_bdgcmp:
     input:  os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_control_lambda.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_treat_pileup.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_posStrand_control_lambda.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_posStrand_treat_pileup.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_negStrand_control_lambda.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_negStrand_treat_pileup.bdg")
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_treat_pileup.bdg")
     output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC_posStrand.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE_posStrand.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC_negStrand.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE_negStrand.bdg")
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bdg")
     log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}.macs2_bdgcmp")
     threads: 4
     conda: "./envs/macs2_bdgcmp.yaml"
@@ -596,27 +578,14 @@ rule macs2_bdgcmp:
         macs2 bdgcmp -t {input[1]} -c {input[0]} -o {output[0]} -m FE -p 1
         macs2 bdgcmp -t {input[1]} -c {input[0]} -o {output[1]} -m logFE -p 1
 
-        macs2 bdgcmp -t {input[3]} -c {input[2]} -o {output[2]} -m FE -p 1
-        macs2 bdgcmp -t {input[3]} -c {input[2]} -o {output[3]} -m logFE -p 1
-
-        macs2 bdgcmp -t {input[5]} -c {input[4]} -o {output[4]} -m FE -p 1
-        macs2 bdgcmp -t {input[5]} -c {input[4]} -o {output[5]} -m logFE -p 1
         """
 
 
 rule slop_bedGraph:
     input:  os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC_posStrand.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE_posStrand.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC_negStrand.bdg"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE_negStrand.bdg")
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bdg")
     output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.posStrand.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.posStrand.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.negStrand.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.negStrand.bedgraph")
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.bedgraph")
     log: os.path.join(OUT_DIR, "{sample}/logs/peaks/{sample}_signal.bedgraph")
     threads: 4
     params: chrm_sizes = "/fs/ess/PES0738/20220614_maxatac_v1_data/snakemake/chip/inputs/hg38.chrom.sizes"
@@ -629,65 +598,29 @@ rule slop_bedGraph:
 
         rm -f {input[0]}
         rm -f {input[1]}
-
-        slopBed -i {input[2]} -g {params.chrm_sizes} -b 0 | bedClip stdin {params.chrm_sizes} {output[2]}
-        slopBed -i {input[3]} -g {params.chrm_sizes} -b 0 | bedClip stdin {params.chrm_sizes} {output[3]}
-
-        rm -f {input[2]}
-        rm -f {input[3]}
-
-
-        slopBed -i {input[4]} -g {params.chrm_sizes} -b 0 | bedClip stdin {params.chrm_sizes} {output[4]}
-        slopBed -i {input[5]} -g {params.chrm_sizes} -b 0 | bedClip stdin {params.chrm_sizes} {output[5]}
-
-        rm -f {input[4]}
-        rm -f {input[5]}
-
         """
 
 
 rule sort_bedgraph:
     input:  os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.posStrand.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.posStrand.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.negStrand.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.negStrand.bedgraph")
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.bedgraph")
     output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.srt.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.srt.posStrand.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.posStrand.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.srt.negStrand.bedgraph"),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.negStrand.bedgraph")
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph")
     threads: 4
     message: "Sorting Bedgraphs"
     shell:
         """
         sort -k1,1 -k2,2n {input[0]} > {output[0]}
         sort -k1,1 -k2,2n {input[1]} > {output[1]}
-
-        sort -k1,1 -k2,2n {input[2]} > {output[2]}
-        sort -k1,1 -k2,2n {input[3]} > {output[3]}
-
-        sort -k1,1 -k2,2n {input[4]} > {output[4]}
-        sort -k1,1 -k2,2n {input[5]} > {output[5]}
         """
 
 rule bedGraph_To_Bigwig:
     input:
         os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.srt.bedgraph"),
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph"),
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.srt.posStrand.bedgraph"),
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.posStrand.bedgraph"),
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.fc.signal.srt.negStrand.bedgraph"),
-        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.negStrand.bedgraph")
+        os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.fc.signal.srt.bedgraph")
     output:
         os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFC.bw"),
-        os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE.bw"),
-        os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFC_posStrand.bw"),
-        os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE_posStrand.bw"),
-        os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFC_negStrand.bw"),
-        os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE_negStrand.bw")
+        os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE.bw")
     log:
         os.path.join(OUT_DIR, "{sample}/logs/bigwig/{sample}.bedGraphToBigWig")
     threads: 
@@ -705,18 +638,6 @@ rule bedGraph_To_Bigwig:
 
         rm -f {input[0]}
         rm -f {input[1]}
-
-        bedGraphToBigWig {input[2]} {params.chrm_sizes} {output[2]}
-        bedGraphToBigWig {input[3]} {params.chrm_sizes} {output[3]}
-
-        rm -f {input[2]}
-        rm -f {input[3]}
-
-        bedGraphToBigWig {input[4]} {params.chrm_sizes} {output[4]}
-        bedGraphToBigWig {input[5]} {params.chrm_sizes} {output[5]}
-
-        rm -f {input[4]}
-        rm -f {input[5]}
 
         """
 
