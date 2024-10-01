@@ -562,8 +562,6 @@ rule make_bw_hist_file:
     shell:
         """
         python ./scripts/bwTOsnstsv.py --input_bw {input[0]} --out_name {output[0]} {output[1]}
-
-        rm -f {output[0]}
         """
      
 
@@ -660,8 +658,4 @@ rule make_FE_bw_hist_file:
         """
         python ./scripts/bwTOsnstsv.py --input_bw {input[0]} --out_name {output[0]} {output[1]}
         python ./scripts/bwTOsnstsv.py --input_bw {input[1]} --out_name {output[2]} {output[3]}
-
-        rm -f {output[0]}
-        rm -f {output[2]}
-
         """
