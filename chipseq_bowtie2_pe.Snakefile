@@ -92,14 +92,17 @@ FINAL_NEG_STRAND_QUANT_RAW_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigw
 FINAL_linearFC_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_linearFC.bw"), sample = meta.sample_list)
 FINAL_log10FE_BW_FILE = expand(os.path.join(OUT_DIR, "{sample}/bigwig/{sample}_log10FE.bw"), sample = meta.sample_list)
 
+FINAL_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32.tsv"), sample = meta.sample_list )
 FINAL_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_chr22_arr_bp32_w32_snsFormat.tsv"), sample = meta.sample_list)
 
+FINAL_linearFC_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_linearFC_chr22_arr_bp32_w32.tsv"), sample = meta.sample_list )
 FINAL_linearFC_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_linearFC_chr22_arr_bp32_w32_snsFormat.tsv"), sample = meta.sample_list )
+FINAL_LOG10FE_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_log10FE_chr22_arr_bp32_w32.tsv"), sample = meta.sample_list )
 FINAL_LOG10FE_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_log10FE_chr22_arr_bp32_w32_snsFormat.tsv"), sample = meta.sample_list )
 
 
 rule all:
-    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE + FINAL_linearFC_BW_FILE + FINAL_log10FE_BW_FILE + FINAL_SNS_TSV + FINAL_linearFC_SNS_TSV + FINAL_LOG10FE_SNS_TSV
+    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE + FINAL_linearFC_BW_FILE + FINAL_log10FE_BW_FILE + FINAL_SNS_TSV + FINAL_TSV + FINAL_linearFC_SNS_TSV + FINAL_LOG10FE_SNS_TSV + FINAL_linearFC_TSV + FINAL_LOG10FE_TSV
 
 rule get_fastq_pe_gz:
     priority: 1
