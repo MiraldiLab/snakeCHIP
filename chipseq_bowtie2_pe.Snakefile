@@ -431,7 +431,7 @@ rule macs2_call_peaks_for_IDR:
     input: os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.bam")
 
     output: temp(os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks.narrowPeak")),
-            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_sorted.bed")
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_sorted.bed"),
             os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_control_lambda.bdg"),
             os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks.xls"),
             os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_summits.bed"),
