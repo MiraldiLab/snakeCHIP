@@ -432,6 +432,10 @@ rule macs2_call_peaks_for_IDR:
 
     output: temp(os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks.narrowPeak")),
             os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks_sorted.bed")
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_control_lambda.bdg"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_peaks.xls"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_summits.bed"),
+            os.path.join(OUT_DIR, "{sample}/peaks/{sample}_ext147_p001_treat_pileup.bdg")
 
     log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}.macs2_IDR")
     params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
