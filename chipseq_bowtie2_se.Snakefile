@@ -575,7 +575,7 @@ rule macs2_bdgcmp:
     output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.bdg"),
             os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bdg")
     log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}.macs2_bdgcmp")
-    threads: 4
+    threads: 8
     conda: "./envs/macs2_bdgcmp.yaml"
     message: "Create bedgraph with macs2 compare bedgraphs"
     shell:
