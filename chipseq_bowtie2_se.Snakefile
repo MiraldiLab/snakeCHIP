@@ -210,7 +210,7 @@ rule quality_filter_namesort_sam2bam_se:
     output: temp(os.path.join(OUT_DIR, "{sample}/aligned_reads/{sample}.namesorted.bam"))
 
     log:    os.path.join(OUT_DIR, "{sample}/logs/filter_namesort/{sample}.namesort_bam")
-    conda: "./envs/samtools.yaml"
+    conda: "./envs/samtools_updated.yaml"
     threads: 8
     benchmark: os.path.join(OUT_DIR, "{sample}/logs/benchmark/{sample}_filter_namesort.benchmark")
     message: "quality_filter_namesort_sam2bam {input}: {threads} threads"
