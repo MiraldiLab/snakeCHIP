@@ -383,7 +383,7 @@ rule macs2_call_peaks:
     params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
             NAME = "{sample}_ext147"
     threads: 4
-    conda: "./envs/macs2.yaml"
+    conda: "./envs/macs2_bdgcmp.yaml"
     message: "call peaks {input}: {threads} threads"
     shell:
         """
@@ -441,7 +441,7 @@ rule macs2_call_peaks_for_IDR:
     params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
             NAME = "{sample}_ext147_p001"
     threads: 4
-    conda: "./envs/macs2.yaml"
+    conda: "./envs/macs2_bdgcmp.yaml"
     message: "call peaks {input}: {threads} threads"
     shell:
         """
@@ -466,7 +466,7 @@ rule macs2_call_peaks_for_IDR_posStrand:
     params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
             NAME = "{sample}_ext147_p001_posStrand"
     threads: 4
-    conda: "./envs/macs2.yaml"
+    conda: "./envs/macs2_bdgcmp.yaml"
     message: "call peaks {input}: {threads} threads"
     shell:
         """
@@ -490,7 +490,7 @@ rule macs2_call_peaks_for_IDR_negStrand:
     params: PEAK_DIR = os.path.join(OUT_DIR, "{sample}/peaks"),
             NAME = "{sample}_ext147_p001_negStrand"
     threads: 4
-    conda: "./envs/macs2.yaml"
+    conda: "./envs/macs2_bdgcmp.yaml"
     message: "call peaks {input}: {threads} threads"
     shell:
         """
