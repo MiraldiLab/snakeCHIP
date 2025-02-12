@@ -102,7 +102,8 @@ FINAL_LOG10FE_SNS_TSV = expand(os.path.join(OUT_DIR, "{sample}/hist/{sample}_log
 
 
 rule all:
-    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE + FINAL_linearFC_BW_FILE + FINAL_log10FE_BW_FILE + FINAL_SNS_TSV + FINAL_TSV + FINAL_linearFC_SNS_TSV + FINAL_LOG10FE_SNS_TSV + FINAL_linearFC_TSV + FINAL_LOG10FE_TSV
+    #input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_POS_BAM_FILE + FINAL_NEG_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_POS_STRAND_QUANT_RAW_BW_FILE + FINAL_NEG_STRAND_QUANT_RAW_BW_FILE + FINAL_linearFC_BW_FILE + FINAL_log10FE_BW_FILE + FINAL_SNS_TSV + FINAL_TSV + FINAL_linearFC_SNS_TSV + FINAL_LOG10FE_SNS_TSV + FINAL_linearFC_TSV + FINAL_LOG10FE_TSV
+    input: FINAL_BW_FILE + ALL_TAGALIGN + FASTQC_posttrim + FRIP + ALL_FLAGSTAT + ALL_PEAKS + ALL_PEAKS_MACS_IDR + ALL_HOMER + FINAL_BAM_FILE + FINAL_QUANT_RAW_BW_FILE + FINAL_linearFC_BW_FILE
 
 rule get_fastq_pe_gz:
     priority: 1
@@ -576,7 +577,7 @@ rule macs2_bdgcmp:
     output: os.path.join(OUT_DIR, "{sample}/peaks/{sample}_linearFC.bdg"),
             os.path.join(OUT_DIR, "{sample}/peaks/{sample}_log10FE.bdg")
     log:    os.path.join(OUT_DIR, "{sample}/logs/macs2/{sample}.macs2_bdgcmp")
-    threads: 4
+    threads: 8
     conda: "./envs/macs2_bdgcmp.yaml"
     message: "Create bedgraph with macs2 compare bedgraphs"
     shell:
